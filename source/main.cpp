@@ -1,14 +1,20 @@
-#include "mbed.h"
+#include "ble/BLE.h"
+#include <Advertising.h>
+#include <events/mbed_events.h>
+#include <mbed.h>
 
-int main()
-{
-    DigitalOut led(LED1);
+static events::EventQueue event_queue(16 * EVENTS_EVENT_SIZE);
 
-    while (true) {
-        // check recive signal, put into event queue
-        // make an event despatch system
+void schedule_ble_events(BLE::OnEventsToProcessCallbackContext *context) {
+  event_queue.call(mbed::Callback<void()>(&context->ble, &BLE::processEvents));
+}
 
-        led = true;
-        ThisThread::sleep_for(500ms);
-    }
+int main() {
+
+  BLE &ble = BLE::Instance();
+  ble.onEventsToProcess(schedule_ble_events);
+  Advertising advertising(ble, event_queue);
+  advertising.start();
+
+  return 0;
 }
