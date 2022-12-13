@@ -1,5 +1,5 @@
+#include "Advertising.h"
 #include "ble/BLE.h"
-#include <Advertising.h>
 #include <cstdio>
 #include <events/mbed_events.h>
 #include <http_service.h>
@@ -7,10 +7,12 @@
 #include <pch.h>
 
 DigitalOut led1(LED1);
-
 GSH::HttpService &http_service = GSH::HttpService::GetInstance();
-
 static events::EventQueue event_queue(16 * EVENTS_EVENT_SIZE);
+
+const static int DEVICE_ID = 1;
+const static char WIFI_SSID[] = "509-2";
+const static char WIFI_KEY[] = "max30201";
 
 void schedule_ble_events(BLE::OnEventsToProcessCallbackContext *context) {
   event_queue.call(mbed::Callback<void()>(&context->ble, &BLE::processEvents));
@@ -18,21 +20,32 @@ void schedule_ble_events(BLE::OnEventsToProcessCallbackContext *context) {
 
 void polling() {
   GSH::HttpService::HttpResponse *response =
-      http_service.http_get("http://192.168.0.101:3000", NULL);
-  if (strcmp(response->body, "Hello World!") == 0) {
-    led1 = !led1;
+      http_service.http_get("http://192.168.0.101:3000/agent/1", NULL);
+  if (response->body[19] == '0') {
+    led1 = false;
+  } else {
+    led1 = true;
   }
 }
 
 int main() {
-  http_service.init("509-2", "max30201");
+  http_service.init(WIFI_SSID, WIFI_KEY);
   led1 = true;
 
   BLE &ble = BLE::Instance();
   ble.onEventsToProcess(schedule_ble_events);
-  Advertising advertising(ble, event_queue);
+  Advertising advertising(ble, event_queue, DEVICE_ID);
 
-  event_queue.call_every(5s, polling);
+  char msg[1024];
+  sprintf(msg,
+          "{\"id\": %d,\"name\": \"Agent%d\",\"location\": "
+          "0,\"functionStateList\": [{\"type\": 0,\"state\": 0}]}",
+          DEVICE_ID, DEVICE_ID);
+
+  GSH::HttpService::HttpResponse *response = http_service.http_post(
+      "http://192.168.0.101:3000/agent/register", NULL, msg);
+
+  event_queue.call_every(1s, polling);
   advertising.start();
 
   return 0;

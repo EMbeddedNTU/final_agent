@@ -1,14 +1,15 @@
 #include "ble/BLE.h"
 #include "ble/gap/Gap.h"
+#include <cstdio>
 #include <events/mbed_events.h>
-
-const static char DEVICE_NAME[] = "Agent1";
 
 class Advertising : ble::Gap::EventHandler {
 
 public:
-  Advertising(BLE &ble, events::EventQueue &event_queue)
-      : _ble(ble), _event_queue(event_queue), _adv_data_builder(_adv_buffer) {}
+  Advertising(BLE &ble, events::EventQueue &event_queue, int DEVICE_ID)
+      : _ble(ble), _event_queue(event_queue), _adv_data_builder(_adv_buffer) {
+    std::sprintf(DEVICE_NAME, "Agent%d", DEVICE_ID);
+  }
 
   void start() {
     _ble.init(this, &Advertising::on_init_complete);
@@ -65,4 +66,5 @@ private:
   events::EventQueue &_event_queue;
   uint8_t _adv_buffer[ble::LEGACY_ADVERTISING_MAX_SIZE];
   ble::AdvertisingDataBuilder _adv_data_builder;
+  char DEVICE_NAME[];
 };
