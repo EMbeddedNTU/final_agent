@@ -1,64 +1,82 @@
 #pragma once
 
 #include "mbed.h"
+#include "platform/SharedPtr.h"
+#include "logger.h"
 
 namespace GSH {
 
-    class Socket {
-        static constexpr size_t MAX_NUMBER_OF_ACCESS_POINTS = 10;
+class Socket {
+  static constexpr size_t MAX_NUMBER_OF_ACCESS_POINTS = 10;
 
-        static constexpr int SECONDS = 1000000;
+  static constexpr int SECONDS = 1000000;
 
-        static constexpr int MAX_WIFI_RETRY_COUNT = 15;
-        static constexpr int MAX_OPEN_RETRY_COUNT = 15;
-        static constexpr int MAX_HOST_RESOLVE_RETRY_COUNT = 15;
-        static constexpr int MAX_CONNECT_RETRY_COUNT = 15;
+  static constexpr int MAX_WIFI_RETRY_COUNT = 15;
+  static constexpr int MAX_OPEN_RETRY_COUNT = 15;
+  static constexpr int MAX_HOST_RESOLVE_RETRY_COUNT = 15;
+  static constexpr int MAX_CONNECT_RETRY_COUNT = 15;
 
-    public:
-        Socket() : m_Net(NetworkInterface::get_default_instance()) {}
+public:
+  static SharedPtr<Socket> create() {
+    SharedPtr<Socket> ptr(new Socket());
 
-        ~Socket() {
-            if (m_Net) 
-            {
-                m_Net->disconnect();
-            }
-        }
+    return ptr;
+  }
 
-        bool init();
+  Socket() : m_Net(NetworkInterface::get_default_instance()) {}
 
-        void wifi_scan();
+  ~Socket() {
+    if (m_Net) {
+      m_Net->disconnect();
+    }
+    if (m_Socket != NULL)
+      delete m_Socket;
+    if (m_Address != NULL)
+      delete m_Address;
+    if (m_Net != NULL)
+      delete m_Net;
+    if (m_Wifi != NULL)
+      delete m_Wifi;
+    if (m_Hostname != NULL)
+      delete m_Hostname;
+  }
 
-        bool wifi_connect(const char* ssid, const char* password, nsapi_security security = NSAPI_SECURITY_WPA_WPA2);
+  bool init();
 
-        bool wifi_connect_default();
+  void wifi_scan();
 
-        bool connect(const char* hostname, const int port);
+  bool wifi_connect(const char *ssid, const char *password,
+                    nsapi_security security = NSAPI_SECURITY_WPA_WPA2);
 
-        bool send(char *buffer, int len);
+  bool wifi_connect_default();
 
-        int recv_chunk(char* buffer, uint32_t length);
+  bool connect(const char *hostname, const int port);
 
-        void close();
+  bool send(char *buffer, int len);
 
-    private:
-        void print_network_info();
+  int recv_chunk(char *buffer, uint32_t length);
 
-        bool socket_open();
+  void close();
 
-        bool address_initialize(const char* hostname, const int port);
-        bool resolve_hostname(const char* hostname);
+private:
+  void print_network_info();
 
-        bool socket_connect();
+  bool socket_open();
 
-        void socket_restart();
+  bool address_initialize(const char *hostname, const int port);
+  bool resolve_hostname(const char *hostname);
 
-    private:
-        NetworkInterface *m_Net;
-        WiFiInterface *m_Wifi;
-        int m_Port;
-        const char* m_Hostname;
-        TCPSocket *m_Socket = new TCPSocket();
-        SocketAddress *m_Address = new SocketAddress();
-    };
+  bool socket_connect();
 
-}
+  void socket_restart();
+
+private:
+  NetworkInterface *m_Net;
+  WiFiInterface *m_Wifi;
+  int m_Port;
+  const char *m_Hostname;
+  TCPSocket *m_Socket = new TCPSocket();
+  SocketAddress *m_Address = new SocketAddress();
+};
+
+} // namespace GSH

@@ -1,5 +1,6 @@
 #include "Advertising.h"
 #include "ble/BLE.h"
+#include "logger.h"
 #include <cstdio>
 #include <events/mbed_events.h>
 #include <http_service.h>
@@ -18,14 +19,35 @@ void schedule_ble_events(BLE::OnEventsToProcessCallbackContext *context) {
   event_queue.call(mbed::Callback<void()>(&context->ble, &BLE::processEvents));
 }
 
+void freeResponse(GSH::HttpService::HttpResponse *hresp) {
+  if (hresp != NULL) {
+    if (hresp->body != NULL)
+      free(hresp->body);
+    if (hresp->status_code != NULL)
+      free(hresp->status_code);
+    if (hresp->status_text != NULL)
+      free(hresp->status_text);
+    if (hresp->request_headers != NULL)
+      free(hresp->request_headers);
+    if (hresp->response_headers != NULL)
+      free(hresp->response_headers);
+    free(hresp);
+  }
+}
+
+int num = 0;
+
 void polling() {
   GSH::HttpService::HttpResponse *response =
       http_service.http_get("http://192.168.0.101:3000/agent/1", NULL);
+  GSH_ERROR("%s %d", response->body, num);
   if (response->body[19] == '0') {
     led1 = false;
   } else {
     led1 = true;
   }
+  freeResponse(response);
+  num += 1;
 }
 
 int main() {
