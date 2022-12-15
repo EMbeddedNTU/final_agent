@@ -92,7 +92,7 @@ namespace GSH {
         return true;
     }
 
-    bool Socket::send(char *buffer, int len) 
+    bool Socket::send(const char *buffer, int len) 
     {
         nsapi_size_t bytes_to_send = len;
         nsapi_size_or_error_t bytes_sent = 0;

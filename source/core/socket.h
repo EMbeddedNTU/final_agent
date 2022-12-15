@@ -18,8 +18,7 @@ class Socket {
 
 public:
   static SharedPtr<Socket> create() {
-    SharedPtr<Socket> ptr(new Socket());
-
+    SharedPtr<Socket> ptr(new Socket);
     return ptr;
   }
 
@@ -52,7 +51,7 @@ public:
 
   bool connect(const char *hostname, const int port);
 
-  bool send(char *buffer, int len);
+  bool send(const char *buffer, int len);
 
   int recv_chunk(char *buffer, uint32_t length);
 

@@ -18,6 +18,26 @@ namespace GSH {
             char *status_text;
             char *request_headers;
             char *response_headers;
+
+            ~HttpResponse()
+            {
+                GSH_DEBUG("Clean up http response")
+                clean_up();
+            }
+
+            void clean_up()
+            {
+                if (body != NULL)
+                    free(body);
+                if (status_code != NULL)
+                    free(status_code);
+                if (status_text != NULL)
+                    free(status_text);
+                if (request_headers != NULL)
+                    free(request_headers);
+                if (response_headers != NULL)
+                    free(response_headers);
+            }
         };
 
     public:
@@ -29,10 +49,10 @@ namespace GSH {
         static HttpService& GetInstance();
         bool init(const char* ssid, const char* password, nsapi_security security=NSAPI_SECURITY_WPA_WPA2);
 
-        HttpResponse* http_request(char* http_headers, SharedPtr<ParsedUrl> purl);
+        SharedPtr<HttpResponse> http_request(char* http_headers, SharedPtr<ParsedUrl> purl);
 
-        HttpResponse* http_get(const char *url, char *custom_headers);
-        HttpResponse* http_post(const char *url, char *custom_headers, char *post_data);
+        SharedPtr<HttpResponse> http_get(const char *url, char *custom_headers);
+        SharedPtr<HttpResponse> http_post(const char *url, char *custom_headers, char *post_data);
 
     private:
         SharedPtr<Socket> m_Socket;
