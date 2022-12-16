@@ -48,7 +48,7 @@ namespace GSH {
         }
 
         /* Allocate memeory for htmlcontent */
-        SharedPtr<HttpResponse> hresp((HttpResponse *)malloc(sizeof(struct HttpResponse)));
+        SharedPtr<HttpResponse> hresp(new HttpResponse());
         if (!hresp) 
         {
             GSH_ERROR("Unable to allocate memory for htmlcontent.");
@@ -101,113 +101,24 @@ namespace GSH {
         hresp->status_code_int = atoi(status_code);
         hresp->status_text = status_text;
 
-        GSH_WARN("here");
-
         /* Parse response headers */
         char *headers = get_until(response, "\r\n\r\n");
         hresp->response_headers = headers;
 
-        GSH_WARN("here");
-
         /* Assign request headers */
         hresp->request_headers = http_headers;
-        GSH_WARN("here");
 
         /* Assign request url */
-        GSH_INFO("request_uri use count %d", hresp->request_uri.use_count());
-        GSH_INFO("purl use count %d", purl.use_count());
-        hresp->request_uri.get();
-        purl.get();
-        GSH_WARN("here");
-
         hresp->request_uri = purl;
-        GSH_WARN("here");
 
         /* Parse body */
         char *body = strstr(response, "\r\n\r\n");
         body = str_replace("\r\n\r\n", "", body);
         hresp->body = body;
-        GSH_WARN("here");
 
         /* Return response */
         return hresp;
     }
-
-    /*
-        Makes a HTTP GET request to the given url
-    */
-    // SharedPtr<HttpService::HttpResponse> HttpService::http_get(const char *url, char *custom_headers) 
-    // {
-    //     /* Parse url */
-    //     SharedPtr<ParsedUrl> purl = ParsedUrl::create(url);
-    //     if (purl == nullptr) 
-    //     {
-    //         GSH_ERROR("Unable to parse url");
-    //         return nullptr;
-    //     }
-
-    //     /* Declare variable */
-    //     char* http_headers = (char *)malloc(1024);
-
-    //     /* Build query/headers */
-    //     if (purl->path != NULL) {
-    //         if (purl->query != NULL) {
-    //         sprintf(http_headers,
-    //                 "GET /%s?%s HTTP/1.1\r\nHost:%s\r\nConnection:close\r\n",
-    //                 purl->path, purl->query, purl->host);
-    //         } else {
-    //         sprintf(http_headers,
-    //                 "GET /%s HTTP/1.1\r\nHost:%s\r\nConnection:close\r\n", purl->path,
-    //                 purl->host);
-    //         }
-    //     } else {
-    //         if (purl->query != NULL) {
-    //         sprintf(http_headers,
-    //                 "GET /?%s HTTP/1.1\r\nHost:%s\r\nConnection:close\r\n",
-    //                 purl->query, purl->host);
-    //         } else {
-    //         sprintf(http_headers, "GET / HTTP/1.1\r\nHost:%s\r\nConnection:close\r\n",
-    //                 purl->host);
-    //         }
-    //     }
-
-    // /* Handle authorisation if needed */
-    // if (purl->username != NULL) {
-    //     /* Format username:password pair */
-    //     char *upwd = (char *)malloc(1024);
-    //     sprintf(upwd, "%s:%s", purl->username, purl->password);
-    //     upwd = (char *)realloc(upwd, strlen(upwd) + 1);
-
-    //     /* Base64 encode */
-    //     char *base64 = base64_encode(upwd);
-
-    //     /* Form header */
-    //     char *auth_header = (char *)malloc(1024);
-    //     sprintf(auth_header, "Authorization: Basic %s\r\n", base64);
-    //     auth_header = (char *)realloc(auth_header, strlen(auth_header) + 1);
-
-    //     /* Add to header */
-    //     http_headers = (char *)realloc(http_headers, strlen(http_headers) +
-    //                                                     strlen(auth_header) + 2);
-    //     sprintf(http_headers, "%s%s", http_headers, auth_header);
-    // }
-
-    //     /* Add custom headers, and close */
-    //     if (custom_headers != NULL) {
-    //         sprintf(http_headers, "%s%s\r\n", http_headers, custom_headers);
-    //     } else {
-    //         sprintf(http_headers, "%s\r\n", http_headers);
-    //     }
-    //     http_headers = (char *)realloc(http_headers, strlen(http_headers) + 1);
-
-    //     /* Make request and return response */
-    //     SharedPtr<HttpResponse> hresp = http_request(http_headers, purl);
-
-    //     // /* Handle redirect */
-    //     // return handle_redirect_get(hresp, custom_headers);
-    //     GSH_TRACE("Http get response returned");
-    //     return hresp;
-    // }
 
     /*
         Makes a HTTP POST request to the given url
