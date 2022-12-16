@@ -21,7 +21,7 @@ struct ParsedUrl {
   char *password; /* optional */
 
   static SharedPtr<ParsedUrl> create(const char *url) {
-    SharedPtr<ParsedUrl> ptr(new ParsedUrl);
+    SharedPtr<ParsedUrl> ptr(new ParsedUrl());
     if (!ptr->Parse(url)) {
       GSH_ERROR("Url can't be parsed");
       return nullptr;
@@ -34,7 +34,8 @@ struct ParsedUrl {
     return ptr;
   }
 
-  ParsedUrl() {
+  ParsedUrl() 
+  {
     scheme = NULL;
     host = NULL;
     port = NULL;
@@ -324,6 +325,7 @@ private:
   }
 
   void clean_up() {
+    GSH_DEBUG("Clean up parsed url");
     if (NULL != scheme)
       free(scheme);
     if (NULL != host)

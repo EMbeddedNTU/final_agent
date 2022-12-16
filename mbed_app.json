@@ -4,6 +4,11 @@
             "value": false
         }
     },
+    "macros": [
+        "MBED_HEAP_STATS_ENABLED=1",
+        "MBED_STACK_STATS_ENABLED=1",
+        "MBED_MEM_TRACING_ENABLED=1"
+    ],
     "target_overrides": {
         "*": {
             "nsapi.default-wifi-security": "WPA_WPA2",
@@ -12,7 +17,8 @@
             "platform.stdio-baud-rate": 9600,
             "mbed-trace.enable": false,
             "mbed-trace.max-level": "TRACE_LEVEL_DEBUG",
-            "rtos.main-thread-stack-size": 8192
+            "rtos.main-thread-stack-size": 8192,
+            "platform.memory-tracing-enabled": true
         },
         "DISCO_F413ZH": {
             "target.components_add": ["ism43362"],

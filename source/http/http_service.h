@@ -12,37 +12,50 @@ namespace GSH {
         struct HttpResponse
         {
             SharedPtr<ParsedUrl> request_uri;
-            char *body;
-            char *status_code;
+            char* body;
+            char* status_code;
             int status_code_int;
-            char *status_text;
-            char *request_headers;
-            char *response_headers;
+            char* status_text;
+            char* request_headers;
+            char* response_headers;
+
+            HttpResponse()
+            {
+                body = nullptr;
+                request_headers = nullptr;
+                response_headers = nullptr;
+                status_code = nullptr;
+                status_text = nullptr;
+                request_uri = SharedPtr<ParsedUrl>(nullptr);
+            }
 
             ~HttpResponse()
             {
-                GSH_DEBUG("Clean up http response")
+                GSH_DEBUG("Clean up http response");
                 clean_up();
             }
 
             void clean_up()
             {
-                if (body != NULL)
+                if (body != nullptr)
                     free(body);
-                if (status_code != NULL)
+                if (status_code != nullptr)
                     free(status_code);
-                if (status_text != NULL)
+                if (status_text != nullptr)
                     free(status_text);
-                if (request_headers != NULL)
+                if (request_headers != nullptr)
                     free(request_headers);
-                if (response_headers != NULL)
+                if (response_headers != nullptr)
                     free(response_headers);
             }
         };
 
     public:
         HttpService();
-        ~HttpService() = default;
+        ~HttpService() 
+        {
+            GSH_TRACE("Http service destroied");
+        };
         HttpService(HttpService &other) = delete;
         void operator=(const HttpService &) = delete;
 

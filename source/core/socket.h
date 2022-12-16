@@ -18,7 +18,7 @@ class Socket {
 
 public:
   static SharedPtr<Socket> create() {
-    SharedPtr<Socket> ptr(new Socket);
+    SharedPtr<Socket> ptr(new Socket());
     return ptr;
   }
 
@@ -28,16 +28,10 @@ public:
     if (m_Net) {
       m_Net->disconnect();
     }
-    if (m_Socket != NULL)
+    if (m_Socket != nullptr)
       delete m_Socket;
-    if (m_Address != NULL)
+    if (m_Address != nullptr)
       delete m_Address;
-    if (m_Net != NULL)
-      delete m_Net;
-    if (m_Wifi != NULL)
-      delete m_Wifi;
-    if (m_Hostname != NULL)
-      delete m_Hostname;
   }
 
   bool init();

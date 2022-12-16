@@ -7,6 +7,8 @@ namespace GSH {
 
     bool Socket::init() 
     {
+        GSH_TRACE("Init socket");
+
         if (!m_Net) 
         {
             GSH_ERROR("Error! No network interface found.\r\n");
