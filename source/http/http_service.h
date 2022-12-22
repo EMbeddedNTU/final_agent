@@ -3,6 +3,7 @@
 #include "platform/SharedPtr.h"
 #include "core/socket.h"
 #include "parsed_url.h"
+#include <string>
 
 namespace GSH {
 
@@ -12,7 +13,8 @@ namespace GSH {
         struct HttpResponse
         {
             SharedPtr<ParsedUrl> request_uri;
-            char* body;
+            // char* body;
+            std::string body;
             char* status_code;
             int status_code_int;
             char* status_text;
@@ -37,8 +39,8 @@ namespace GSH {
 
             void clean_up()
             {
-                if (body != nullptr)
-                    free(body);
+                // if (body != nullptr)
+                //     free(body);
                 if (status_code != nullptr)
                     free(status_code);
                 if (status_text != nullptr)

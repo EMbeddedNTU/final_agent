@@ -20,7 +20,7 @@
 
 
 
-#define LOG_LEVEL_TRACE
+#define LOG_LEVEL_ERROR
 
 
 #include "mbed.h"

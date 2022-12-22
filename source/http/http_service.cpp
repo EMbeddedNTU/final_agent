@@ -73,13 +73,24 @@ namespace GSH {
         m_Socket->send(http_headers, strlen(http_headers));
 
         /* Recieve into response*/
-        char *response = (char *)malloc(0);
+        // char *response = (char *)malloc(0);
+        char *response = nullptr;
         char BUF[BUFSIZ];
         size_t recived_len = 0;
+
         while ((recived_len = m_Socket->recv_chunk(BUF, BUFSIZ - 1)) > 0) {
             BUF[recived_len] = '\0';
-            response = (char *)realloc(response, strlen(response) + strlen(BUF) + 1);
-            sprintf(response, "%s%s", response, BUF);
+            int current_response_len = strlen(response);
+            GSH_DEBUG("resp len %d, buf len %d", current_response_len, strlen(BUF));
+
+            if (response == nullptr) {
+                response = (char *) malloc(recived_len + 1);
+                memcpy(response + current_response_len, BUF, strlen(BUF) + 1);
+            } else {
+                response = (char *)realloc(response, current_response_len + strlen(BUF) + 1);
+                memcpy(response + current_response_len, BUF, strlen(BUF) + 1);
+            }            
+            GSH_DEBUG("in recv resp %.*s", recived_len, response);
         }
         if (recived_len < 0) {
             free(http_headers);
@@ -88,7 +99,10 @@ namespace GSH {
         }
 
         /* Reallocate response */
-        response = (char*)realloc(response, strlen(response) + 1);
+        int response_len = strlen(response) + 1;
+        response = (char*)realloc(response, response_len);
+        
+        GSH_INFO("last b buf %x", BUF[strlen(BUF) + 1] & 0xff);
 
         /* Parse status code and text */
         char *status_line = get_until(response, "\r\n");
@@ -101,20 +115,44 @@ namespace GSH {
         hresp->status_code_int = atoi(status_code);
         hresp->status_text = status_text;
 
+
+        // for (int i = 0; i<response_len; i++) {
+        //     GSH_DEBUG("b1 resp %x buf %x", response[i] & 0xff, BUF[i] & 0xff);
+        // }
+
+                /* Parse body */
+        char *body = strstr(response, "\r\n\r\n");
+        GSH_DEBUG("resp p %p", response);
+        GSH_DEBUG("body %p", body);
+        GSH_DEBUG("body %s", body);
+        body = str_replace("\r\n\r\n", "", body);
+        GSH_DEBUG("body %s", body);
+        hresp->body = body;
+
         /* Parse response headers */
         char *headers = get_until(response, "\r\n\r\n");
+        // for (int i = 0; i<response_len; i++) {
+        //     GSH_INFO("b2 resp %x buf %x", response[i] & 0xff, BUF[i] & 0xff);
+        // }
+
         hresp->response_headers = headers;
 
-        /* Assign request headers */
         hresp->request_headers = http_headers;
 
-        /* Assign request url */
         hresp->request_uri = purl;
 
-        /* Parse body */
-        char *body = strstr(response, "\r\n\r\n");
-        body = str_replace("\r\n\r\n", "", body);
-        hresp->body = body;
+        // for (int i = 0; i<response_len; i++) {
+        //     GSH_DEBUG("b5 resp %x buf %x", response[i] & 0xff, BUF[i] & 0xff);
+        // }
+
+        // /* Parse body */
+        // char *body = strstr(response, "\r\n\r\n");
+        // GSH_DEBUG("resp p %p", response);
+        // GSH_DEBUG("body %p", body);
+        // GSH_DEBUG("body %s", body);
+        // body = str_replace("\r\n\r\n", "", body);
+        // GSH_DEBUG("body %s", body);
+        // hresp->body = body;
 
         /* Return response */
         return hresp;
