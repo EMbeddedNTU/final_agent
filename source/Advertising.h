@@ -14,7 +14,7 @@ public:
   void start() {
     _ble.init(this, &Advertising::on_init_complete);
 
-    _event_queue.dispatch_forever();
+    // _event_queue.dispatch_forever();
   }
 
 private:

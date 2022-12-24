@@ -23,7 +23,6 @@ namespace GSH {
 
             HttpResponse()
             {
-                body = nullptr;
                 request_headers = nullptr;
                 response_headers = nullptr;
                 status_code = nullptr;

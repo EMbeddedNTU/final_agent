@@ -1,16 +1,17 @@
 #include "pch.h"
 #include "fileSystem.h"
+#include <cstdio>
 
 
 namespace GSH {
 
-    bool FileSystem::init() 
+    bool FileSystem::init(bool force_reformat) 
     {
         // Try to mount the filesystem
         GSH_INFO("Mounting the filesystem... ");
         int err = m_FS.mount(m_BD);
         GSH_INFO("%s\n", (err ? "Fail :(" : "OK"));
-        if (err || FORCE_REFORMAT) {
+        if (err || force_reformat) {
             // Reformat if we can't mount the filesystem
             GSH_WARN("formatting... ");
             err = m_FS.reformat(m_BD);
@@ -20,22 +21,24 @@ namespace GSH {
                 return false;
             }
         }
-        return true;
 
         m_CurrentDirPath = "/fs/";
+
+        return true;
     }
+
     
-    FILE* FileSystem::openFile(const std::string& filename)
+    FILE* FileSystem::openFile(const std::string& filename, const char* flag)
     {
         // Open the numbers file
         std::string filepath = m_CurrentDirPath + filename;
         GSH_INFO("Opening %s", filepath.c_str());
-        FILE *f = fopen(filepath.c_str(), "r+");
+        FILE *f = fopen(filepath.c_str(), flag);
         GSH_INFO("%s\n", (!f ? "Fail :(" : "OK"));
         if (!f) {
             // Create the numbers file if it doesn't exist
             GSH_INFO("No file found, creating a new file... ");
-            f = fopen("/fs/numbers.txt", "w+");
+            f = fopen(filepath.c_str(), "w+");
             GSH_INFO("%s\n", (!f ? "Fail :(" : "OK"));
             if (!f) {
                 GSH_ERROR("%s (%d)\n", strerror(errno), -errno);
@@ -44,7 +47,7 @@ namespace GSH {
         return f;
     }
 
-    bool FileSystem(FILE* f)
+    bool FileSystem::closeFile(FILE* f)
     {
         GSH_TRACE("Closing file... ");
         int err = fclose(f);
@@ -59,11 +62,15 @@ namespace GSH {
 
     void FileSystem::printFile(FILE* f)
     {
-        GSH_TRACE("file:");
-        while (!feof(f)) {
-            int c = fgetc(f);
+        GSH_ERROR("file:");
+        fseek(f, 0, SEEK_SET);
+        int c = fgetc(f);
+        printf("%c", c);
+        while (c != EOF) {
+            c = fgetc(f);
             printf("%c", c);
         }
+
     }
 
     DIR* FileSystem::openDir(const std::string& _dirPath)

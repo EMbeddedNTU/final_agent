@@ -22,9 +22,9 @@ namespace GSH {
 
         ~FileSystem() {}
 
-        bool init();
+        bool init(bool force_reformat);
 
-        FILE* openFile(const std::string& filename);
+        FILE* openFile(const std::string& filename, const char* flag);
 
         bool closeFile(FILE* f);
 
